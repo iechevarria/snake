@@ -8,25 +8,45 @@ var canvas = document.getElementById('canvas')
 var context = canvas.getContext('2d')
 
 var snake = {
-  x: 20,
-  y: 20,
+  tail: new Node(20, 19, null),
+  head: new Node(20, 20, this.tail),
 
   update: function () {
     if (direction === 'up') {
-      this.y = (this.y + 39) % 40
+      this.head.y = (this.head.y + 39) % 40
     } else if (direction === 'down') {
-      this.y = (this.y + 1) % 40
+      this.head.y = (this.head.y + 1) % 40
     } else if (direction === 'left') {
-      this.x = (this.x + 39) % 40
+      this.head.x = (this.head.x + 39) % 40
     } else {
-      this.x = (this.x + 1) % 40
+      this.head.x = (this.head.x + 1) % 40
     }
   },
 
   draw: function () {
     context.fillStyle = '#fff'
-    context.fillRect(this.x * 20, this.y * 20, 20, 20)
+    var curNode = this.head
+    while (curNode.next != null) {
+      context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
+      curNode = curNode.next
+    }
+    context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
+  },
+
+  append: function () {
+    this.curNode = this.head
+    while (this.curNode.next != null) {
+      this.curNode = this.curNode.next
+    }
+    this.endNode = new Node(this.curNode.x, this.curNode.y)
+    this.curNode.next = this.endNode
   }
+}
+
+function Node (x, y, next) {
+  this.x = x
+  this.y = y
+  this.next = next
 }
 
 function draw () {
@@ -53,6 +73,8 @@ window.onkeydown = function (e) {
   // right: move right
   } else if (key === 39) {
     direction = 'right'
+  } else if (key === 65) {
+    snake.append()
   }
 }
 
