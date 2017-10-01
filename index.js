@@ -11,12 +11,7 @@ var snake = {
   head: new Node(20, 20),
 
   update: function () {
-    var curNode = this.head
-    while (curNode.next != null) {
-      curNode.next.x = curNode.x
-      curNode.next.y = curNode.y
-      curNode = curNode.next
-    }
+    this.checkCollisions()
 
     if (direction === 'up') {
       this.head.y = (this.head.y + 39) % 40
@@ -27,11 +22,32 @@ var snake = {
     } else {
       this.head.x = (this.head.x + 1) % 40
     }
+
+    var curNode = this.head
+    var tmpx1 = this.head.x
+    var tmpy1 = this.head.y
+
+    while (curNode.next != null) {
+      var tmpx2 = curNode.x
+      var tmpy2 = curNode.y
+      curNode.x = tmpx1
+      curNode.y = tmpy1
+      tmpx1 = tmpx2
+      tmpy1 = tmpy2
+      curNode = curNode.next
+    }
+    if (curNode !== this.head) {
+      curNode.x = tmpx1
+      curNode.y = tmpy1
+    }
+  },
+
+  checkCollisions: function () {
   },
 
   draw: function () {
     context.fillStyle = '#fff'
-    var curNode = this.head
+    var curNode = this.head.next
     while (curNode.next != null) {
       context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
       curNode = curNode.next
@@ -89,3 +105,5 @@ setInterval(function () {
   update()
   draw()
 }, 1000 / FPS)
+
+snake.append()
