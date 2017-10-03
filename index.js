@@ -11,8 +11,7 @@ var snake = {
   head: new Node(20, 20),
 
   update: function () {
-    this.checkCollisions()
-
+    // TODO: fix weird behavior
     if (direction === 'up') {
       this.head.y = (this.head.y + 39) % 40
     } else if (direction === 'down') {
@@ -42,6 +41,7 @@ var snake = {
     }
   },
 
+  // TODO: write this
   checkCollisions: function () {
   },
 
@@ -62,6 +62,14 @@ var snake = {
     }
     var endNode = new Node(curNode.x, curNode.y)
     curNode.next = endNode
+  }
+}
+
+// TODO: randomly dropped food
+var food = {
+  draw: function () {
+    context.fillStyle = '#0f0'
+    context.fillRect(this.x, this.y)
   }
 }
 
@@ -106,4 +114,3 @@ setInterval(function () {
   draw()
 }, 1000 / FPS)
 
-snake.append()
