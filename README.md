@@ -1,5 +1,6 @@
 # snake
-JavaScript implementation of Snake.
+JavaScript implementation of <a href="https://en.wikipedia.org/wiki/Snake_(video_game)">Snake</a>.
+Check it out at <a href='http://echevarria.io/code/snake/'>echevarria.io</a>.
 
 ## Controls
 <ul>
