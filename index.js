@@ -8,13 +8,7 @@ var canvas = document.getElementById('canvas')
 var context = canvas.getContext('2d')
 
 var snake = {
-  head: null,
-  tail: null,
-
-  init: function () {
-    this.head = new Node(20, 20)
-    this.head.next = null
-  },
+  head: new Node(20, 20),
 
   update: function () {
     var tmpx1 = this.head.x
@@ -53,16 +47,11 @@ var snake = {
   draw: function () {
     context.fillStyle = '#fff'
     var curNode = this.head
-    context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
-    if (curNode.next != null) {
-      curNode = curNode.next
-      context.fillStyle = '#fff'
-      while (curNode.next != null && curNode != null) {
-        context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
-        curNode = curNode.next
-      }
+    while (curNode.next != null) {
       context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
+      curNode = curNode.next
     }
+    context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
   },
 
   append: function () {
@@ -118,11 +107,8 @@ window.onkeydown = function (e) {
   }
 }
 
-snake.init()
-
 // main loop
 setInterval(function () {
   update()
   draw()
 }, 1000 / FPS)
-
