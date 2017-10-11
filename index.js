@@ -3,6 +3,7 @@ var CANVAS_HEIGHT = 800
 var FPS = 6
 
 var direction = 'up'
+var prevDir = 'up'
 
 var canvas = document.getElementById('canvas')
 var context = canvas.getContext('2d')
@@ -16,6 +17,7 @@ function Node (x, y) {
 var snake = {
   head: new Node(20, 20),
   collided: false,
+  toAppend: 0,
 
   update: function () {
     var tmpx1 = this.head.x
@@ -23,12 +25,16 @@ var snake = {
 
     if (direction === 'up') {
       this.head.y = (this.head.y + 39) % 40
+      prevDir = 'up'
     } else if (direction === 'down') {
       this.head.y = (this.head.y + 1) % 40
+      prevDir = 'down'
     } else if (direction === 'left') {
       this.head.x = (this.head.x + 39) % 40
+      prevDir = 'left'
     } else {
       this.head.x = (this.head.x + 1) % 40
+      prevDir = 'right'
     }
 
     if (this.head.next !== null) {
@@ -46,8 +52,12 @@ var snake = {
       curNode.y = tmpy1
     }
 
-    this.collided = this.hasCollided()
+    this.checkCollision()
     this.hasEaten()
+    if (this.toAppend > 0) {
+      this.append()
+      this.toAppend --
+    }
   },
 
   append: function () {
@@ -59,21 +69,21 @@ var snake = {
     curNode.next = endNode
   },
 
-  hasCollided: function () {
+  checkCollision: function () {
     var curNode = this.head
     while (curNode.next !== null) {
       curNode = curNode.next
       if (curNode.x === this.head.x && curNode.y === this.head.y) {
-        return true
+        scoreboard.reset()
+        this.head.next = null
       }
     }
-    return false
   },
 
-  // sloppy, can add fruit under head
+  // TODO: refine this logic
   hasEaten: function () {
     if (this.head.x === food.x && this.head.y === food.y) {
-      this.append()
+      this.toAppend += 3
       scoreboard.addPoint()
       var newX = Math.floor(Math.random() * 40)
       var newY = Math.floor(Math.random() * 40)
@@ -98,11 +108,21 @@ var snake = {
       curNode = curNode.next
     }
     context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
+  }
+}
 
-    if (this.collided) {
-      context.fillStyle = '#f00'
-      context.fillRect(100, 100, 100, 100, 100)
-    }
+var food = {
+  x: 10,
+  y: 10,
+
+  setLocation: function (x, y) {
+    this.x = x
+    this.y = y
+  },
+
+  draw: function () {
+    context.fillStyle = '#fff'
+    context.fillRect(this.x * 20, this.y * 20, 20, 20)
   }
 }
 
@@ -118,32 +138,36 @@ var scoreboard = {
   },
 
   draw: function () {
-
+    context.fillStyle = '#000'
+    context.font = '40px Courier'
+    context.fillText(this.points, 381, 41)
+    context.fillStyle = '#fff'
+    context.font = '40px Courier'
+    context.fillText(this.points, 380, 40)
   }
 }
 
-// TODO: randomly dropped food
-var food = {
-  x: 10,
-  y: 10,
+var tooltip = {
+  show: true,
 
-  getX: function () {
-    return this.x
-  },
-
-  getY: function () {
-    return this.y
-  },
-
-  setLocation: function (x, y) {
-    this.x = x
-    this.y = y
+  toggle: function () {
+    this.show = !this.show
   },
 
   draw: function () {
-    context.fillStyle = '#0f0'
-    context.fillRect(this.x * 20, this.y * 20, 20, 20)
+    if (this.show) {
+      context.font = '14px Courier'
+      context.fillText('   up: move up', 25, 30)
+      context.fillText(' down: move down', 25, 50)
+      context.fillText(' left: move left', 25, 70)
+      context.fillText('right: move right', 25, 90)
+      context.fillText('    h: toggle help', 25, 110)
+    }
   }
+}
+
+function update () {
+  snake.update()
 }
 
 function draw () {
@@ -151,28 +175,33 @@ function draw () {
   context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
   snake.draw()
   food.draw()
-}
-
-function update () {
-  snake.update()
+  scoreboard.draw()
+  tooltip.draw()
 }
 
 window.onkeydown = function (e) {
   var key = e.keyCode ? e.keyCode : e.which
   // up: move up
-  if (key === 38 && direction !== 'down') {
+  if (key === 38 && prevDir !== 'down') {
     direction = 'up'
   // down: move down
-  } else if (key === 40 && direction !== 'up') {
+  } else if (key === 40 && prevDir !== 'up') {
     direction = 'down'
   // left: move left
-  } else if (key === 37 && direction !== 'right') {
+  } else if (key === 37 && prevDir !== 'right') {
     direction = 'left'
   // right: move right
-  } else if (key === 39 && direction !== 'left') {
+  } else if (key === 39 && prevDir !== 'left') {
     direction = 'right'
-  } else if (key === 65) {
-    snake.append()
+  }
+}
+
+window.onkeyup = function (e) {
+  var key = e.keyCode ? e.keyCode : e.which
+  // h: toggle help
+  if (key === 72) {
+    tooltip.toggle()
+    draw()
   }
 }
 
