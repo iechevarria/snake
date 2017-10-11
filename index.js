@@ -7,6 +7,12 @@ var direction = 'up'
 var canvas = document.getElementById('canvas')
 var context = canvas.getContext('2d')
 
+function Node (x, y) {
+  this.x = x
+  this.y = y
+  this.next = null
+}
+
 var snake = {
   head: new Node(20, 20),
   collided: false,
@@ -38,12 +44,21 @@ var snake = {
       }
       curNode.x = tmpx1
       curNode.y = tmpy1
-
-      this.collided = this.hasCollided()
     }
+
+    this.collided = this.hasCollided()
+    this.hasEaten()
   },
 
-  // TODO: write this
+  append: function () {
+    var curNode = this.head
+    while (curNode.next != null) {
+      curNode = curNode.next
+    }
+    var endNode = new Node(curNode.x, curNode.y)
+    curNode.next = endNode
+  },
+
   hasCollided: function () {
     var curNode = this.head
     while (curNode.next !== null) {
@@ -53,6 +68,26 @@ var snake = {
       }
     }
     return false
+  },
+
+  // sloppy, can add fruit under head
+  hasEaten: function () {
+    if (this.head.x === food.x && this.head.y === food.y) {
+      this.append()
+      scoreboard.addPoint()
+      var newX = Math.floor(Math.random() * 40)
+      var newY = Math.floor(Math.random() * 40)
+      var curNode = this.head
+      while (curNode.next !== null) {
+        if (curNode.x === newX && curNode.y === newY) {
+          curNode = this.head
+          newX = Math.floor(Math.random() * 40)
+          newY = Math.floor(Math.random() * 40)
+        }
+        curNode = curNode.next
+      }
+      food.setLocation(newX, newY)
+    }
   },
 
   draw: function () {
@@ -68,42 +103,54 @@ var snake = {
       context.fillStyle = '#f00'
       context.fillRect(100, 100, 100, 100, 100)
     }
+  }
+}
+
+var scoreboard = {
+  points: 0,
+
+  reset: function () {
+    this.points = 0
   },
 
-  append: function () {
-    var curNode = this.head
-    while (curNode.next != null) {
-      curNode = curNode.next
-    }
-    var endNode = new Node(curNode.x, curNode.y)
-    curNode.next = endNode
+  addPoint: function () {
+    this.points ++
+  },
+
+  draw: function () {
+
   }
 }
 
 // TODO: randomly dropped food
 var food = {
-  eaten: false,
+  x: 10,
+  y: 10,
 
-  update: function () {
-    
+  getX: function () {
+    return this.x
+  },
+
+  getY: function () {
+    return this.y
+  },
+
+  setLocation: function (x, y) {
+    this.x = x
+    this.y = y
   },
 
   draw: function () {
     context.fillStyle = '#0f0'
-    context.fillRect(this.x, this.y)
+    context.fillRect(this.x * 20, this.y * 20, 20, 20)
   }
-}
-
-function Node (x, y) {
-  this.x = x
-  this.y = y
-  this.next = null
 }
 
 function draw () {
   context.beginPath()
   context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
   snake.draw()
+  food.draw()
 }
 
 function update () {
