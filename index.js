@@ -8,10 +8,18 @@ var canvas = document.getElementById('canvas')
 var context = canvas.getContext('2d')
 
 var snake = {
-  head: new Node(20, 20),
+  head: null,
+  tail: null,
+
+  init: function () {
+    this.head = new Node(20, 20)
+    this.head.next = null
+  },
 
   update: function () {
-    // TODO: fix weird behavior
+    var tmpx1 = this.head.x
+    var tmpy1 = this.head.y
+
     if (direction === 'up') {
       this.head.y = (this.head.y + 39) % 40
     } else if (direction === 'down') {
@@ -22,20 +30,17 @@ var snake = {
       this.head.x = (this.head.x + 1) % 40
     }
 
-    var curNode = this.head
-    var tmpx1 = this.head.x
-    var tmpy1 = this.head.y
-
-    while (curNode.next != null) {
-      var tmpx2 = curNode.x
-      var tmpy2 = curNode.y
-      curNode.x = tmpx1
-      curNode.y = tmpy1
-      tmpx1 = tmpx2
-      tmpy1 = tmpy2
-      curNode = curNode.next
-    }
-    if (curNode !== this.head) {
+    if (this.head.next !== null) {
+      var curNode = this.head.next
+      while (curNode.next != null) {
+        var tmpx2 = curNode.x
+        var tmpy2 = curNode.y
+        curNode.x = tmpx1
+        curNode.y = tmpy1
+        tmpx1 = tmpx2
+        tmpy1 = tmpy2
+        curNode = curNode.next
+      }
       curNode.x = tmpx1
       curNode.y = tmpy1
     }
@@ -47,12 +52,17 @@ var snake = {
 
   draw: function () {
     context.fillStyle = '#fff'
-    var curNode = this.head.next
-    while (curNode.next != null) {
-      context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
-      curNode = curNode.next
-    }
+    var curNode = this.head
     context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
+    if (curNode.next != null) {
+      curNode = curNode.next
+      context.fillStyle = '#fff'
+      while (curNode.next != null && curNode != null) {
+        context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
+        curNode = curNode.next
+      }
+      context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
+    }
   },
 
   append: function () {
@@ -107,6 +117,8 @@ window.onkeydown = function (e) {
     snake.append()
   }
 }
+
+snake.init()
 
 // main loop
 setInterval(function () {
