@@ -9,6 +9,7 @@ var context = canvas.getContext('2d')
 
 var snake = {
   head: new Node(20, 20),
+  collided: false,
 
   update: function () {
     var tmpx1 = this.head.x
@@ -37,11 +38,21 @@ var snake = {
       }
       curNode.x = tmpx1
       curNode.y = tmpy1
+
+      this.collided = this.hasCollided()
     }
   },
 
   // TODO: write this
-  checkCollisions: function () {
+  hasCollided: function () {
+    var curNode = this.head
+    while (curNode.next !== null) {
+      curNode = curNode.next
+      if (curNode.x === this.head.x && curNode.y === this.head.y) {
+        return true
+      }
+    }
+    return false
   },
 
   draw: function () {
@@ -52,6 +63,11 @@ var snake = {
       curNode = curNode.next
     }
     context.fillRect(curNode.x * 20, curNode.y * 20, 20, 20)
+
+    if (this.collided) {
+      context.fillStyle = '#f00'
+      context.fillRect(100, 100, 100, 100, 100)
+    }
   },
 
   append: function () {
@@ -66,6 +82,12 @@ var snake = {
 
 // TODO: randomly dropped food
 var food = {
+  eaten: false,
+
+  update: function () {
+    
+  },
+
   draw: function () {
     context.fillStyle = '#0f0'
     context.fillRect(this.x, this.y)
